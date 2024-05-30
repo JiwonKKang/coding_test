@@ -2,55 +2,34 @@ import java.util.*;
 
 class Solution {
     public int[] solution(int N, int[] stages) {
-        int [] answer = new int[N];
+        int remainingPlayer = stages.length;
+        int [] numberInStage = new int[N+2];
+        int answer[] = new int[N+1];
         
-        Map<Integer, Double> fail = new HashMap<>();
+        HashMap<Integer, Double> stage = new HashMap<>();
         
-        for(int i = 1; i <= N; i++) {
-            int challenger = countChallenger(stages, i);
-            if(challenger == 0) {
-                fail.put(i, 0.0);
+        for (int i=0; i < stages.length; i++) {
+            numberInStage[stages[i]] += 1;
+        }
+        
+        for(int i=1; i <= N; i++) {
+            if(remainingPlayer == 0) {
+                stage.put(i, 0.0);
                 continue;
             }
-            fail.put(i, (double) countFail(stages, i)/challenger);
+            double fail = (double) numberInStage[i] / remainingPlayer;
+            remainingPlayer -= numberInStage[i];
+            stage.put(i, fail);
         }
         
-        System.out.println(fail);
+        List<Integer> stageKey = new ArrayList<>(stage.keySet());
         
-        List<Integer> keySet = new ArrayList<>(fail.keySet());
+        stageKey.sort((o1,o2) -> stage.get(o2).compareTo(stage.get(o1)));
         
-        keySet.sort((o1,o2) -> {
-            int compare = fail.get(o2).compareTo(fail.get(o1));
-            if(compare == 0) {
-                return o1.compareTo(o2);
-            } else {
-                return compare;
-            }
-            });
         
-        answer = keySet.stream().mapToInt(Integer::intValue).toArray();
-    
+        
+        answer = stageKey.stream().mapToInt(Integer::intValue).toArray();
+
         return answer;
-    }
-    
-    private int countChallenger(int[] stages, int step) {
-        int count = 0;
-        
-        for (int stage : stages) {
-            if(stage >= step) {
-                count++;
-            }
-        }
-        return count;
-    }
-    
-    private int countFail(int[] stages, int step) {
-        int count = 0;
-        for(int stage : stages) {
-            if(stage == step) {
-                count++;
-            }
-        }
-        return count;
     }
 }
